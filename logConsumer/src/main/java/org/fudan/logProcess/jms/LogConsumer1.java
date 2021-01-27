@@ -14,7 +14,8 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
-import org.fudan.logProcess.service.LogIndexDataBase;
+import org.fudan.logProcess.service.LogIndexDataBaseService;
+import org.fudan.logProcess.service.LogProcessService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -30,7 +31,10 @@ import java.util.concurrent.TimeUnit;
 public class LogConsumerWithReply1 {
 
     @Resource
-    LogIndexDataBase logIndexDataBase;
+    LogIndexDataBaseService logIndexDataBase;
+
+    @Resource
+    LogProcessService logProcessService;
 
     /**
      * consumer object
@@ -68,6 +72,8 @@ public class LogConsumerWithReply1 {
                     log.info("handle message: {}", body);
 
                     log.info("handling...");
+
+//                    logProcessService.getLogHandler().handle(body);
 
                     if(body.compareTo("handle error") == 0){
                         CommonResult<?> result = new CommonResult<>(BaseError.HANDLE_ERROR, body);
