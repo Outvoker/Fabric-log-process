@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2021/1/27 16:05
  */
 @FeignClient(value = "LOGINDEXDATABASE")
-public interface LogIndexDataBase {
+public interface LogIndexDataBaseService {
 
     @GetMapping("/log/get")
     CommonResult<?> getLogByOriginalKey(@RequestParam("key") String key);

@@ -7,6 +7,7 @@ import org.fudan.logProcess.jms.LogProducer1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
  * @Description log process task service
  * @author Xu Rui
  */
-@Component
+@Service
 @Slf4j
 public class LogTaskService {
 

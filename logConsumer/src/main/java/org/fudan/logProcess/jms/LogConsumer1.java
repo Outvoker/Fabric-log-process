@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class LogConsumerWithReply1 {
+public class LogConsumer1 {
 
     @Resource
     LogIndexDataBaseService logIndexDataBase;
@@ -45,7 +45,7 @@ public class LogConsumerWithReply1 {
     /**
      *  Construction method, instantiate object
      */
-    public LogConsumerWithReply1() throws MQClientException {
+    public LogConsumer1() throws MQClientException {
 
         // Instantiate with specified consumer group name
         consumer = new DefaultMQPushConsumer(JmsConfigLogConsumer1.CONSUMER_GROUP);
