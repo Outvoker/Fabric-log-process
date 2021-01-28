@@ -1,4 +1,4 @@
-package org.fudan.logProcess.service;
+package org.fudan.logProcess.service.impl;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -6,6 +6,8 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.fudan.logProcess.handler.LogHandler;
+import org.fudan.logProcess.service.LogProcessService;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -18,7 +20,7 @@ import java.util.List;
 @Service("logProcess")
 @Slf4j
 @Getter
-public class LogProcessServiceImpl implements LogProcessService{
+public class LogProcessServiceImpl implements LogProcessService {
 
     private static final String POLICY_FILE = "D:\\university\\blockchain\\logProcess\\logConsumer\\src\\main\\resources\\test.yml";
 
@@ -30,6 +32,7 @@ public class LogProcessServiceImpl implements LogProcessService{
 
     @Override
     public boolean handle(List<MessageExt> messageExts, ConsumeConcurrentlyContext context) {
+        logHandler.handle(messageExts);
         return false;
     }
 }
