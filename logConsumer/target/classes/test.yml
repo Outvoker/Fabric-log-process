@@ -1,0 +1,86 @@
+
+name: logReading
+version: 1
+
+info:
+  separator: '\|@\|'    # the separator between log data items
+  filePath: 'D:\\university\\blockchain\\logTest\\'   # file path (should be modified)
+
+sender:         # sending policy, merge multiple logs into one transaction when the following conditions are met
+  time: 3000  # time interval(seconds), setting to 0 means there is no time interval limit
+  size: 1000    # transaction size(KB), setting to 0 means there is no transaction size limit
+  num: 1000     # number of logs in each transaction, setting to 0 means there is no log number limit in each transaction
+
+handler:
+  mergedDependence:   # merging based on this item
+    - taskNo
+
+  originalItem:   # data items in the logs
+    - number
+    - status
+    - date
+    - time
+    - demanderID
+    - supplierID
+    - taskNo
+    - bussinessSerialNo
+    - exID
+    - serialNo
+    - recordType
+    - successNum
+    - processTime
+    - errorCode
+    - signingStep
+    - processStep1
+    - processMem1
+    - processStatus1
+    - signingInfo1
+    - processStep2
+    - processMem2
+    - processStatus2
+    - signingInfo2
+    - processStep3
+    - processMem3
+    - processStatus3
+    - signingInfo3
+
+  filteredItem:   # the items which should be assigned
+    -
+      item: date
+      type: String
+      rule: first
+    -
+      item: time
+      type: String
+      rule: first
+    -
+      item: demanderID
+      type: String
+      rule: first
+    -
+      item: supplierID
+      type: String
+      rule: first
+    -
+      item: taskNo
+      type: String
+      rule: first
+
+  mergedItem:  # the items which should be merged
+    - exID
+
+  mergedItemRule: multi  # the way of merging, ​​including "single" and "multi"
+
+
+  collectionName:     # the policy of collection name
+    prefix:
+      - "collection"
+    fields:
+      - demanderID
+      - supplierID
+
+  keyPolicy:             # the policy of key name
+    id: "userId"
+    fields:
+      - demanderID
+      - supplierID
