@@ -5,7 +5,7 @@ package org.fudan.logProcess.jms;
  * @Description: producer config
  * @author Xu Rui
  */
-public class JmsConfigLogProducer1 {
+public class JmsConfigLogProducer {
 
     /**
      * Name Server addr, if it is a cluster deployment, use semicolons to separate it

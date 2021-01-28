@@ -4,7 +4,7 @@ package org.fudan.logProcess.jms;
  * @author Xu Rui
  * @Description: consumer config
  */
-public class JmsConfigLogConsumer1 {
+public class LogJmsConfig {
     /**
      * Name Server 地址，因为是集群部署 所以有多个用 分号 隔开
      */

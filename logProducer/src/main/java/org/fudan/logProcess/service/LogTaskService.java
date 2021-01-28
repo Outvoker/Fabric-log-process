@@ -3,10 +3,9 @@ package org.fudan.logProcess.service;
 import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
-import org.fudan.logProcess.jms.LogProducer1;
+import org.fudan.logProcess.jms.LogProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -22,7 +21,7 @@ import java.util.List;
 public class LogTaskService {
 
     @Autowired
-    LogProducer1 logProducer1;
+    LogProducer logProducer;
 
     /**
      * Asynchronously call request method to produce message to MQ, and wait for the result of consuming.
@@ -34,7 +33,7 @@ public class LogTaskService {
     public void request(DeferredResult<CommonResult<?>> deferred, String tag, String msg){
         log.info(Thread.currentThread().getName() + "enter taskService.request");
         try {
-            CommonResult<?> result =  logProducer1.request(tag, msg);
+            CommonResult<?> result =  logProducer.request(tag, msg);
             log.info(Thread.currentThread().getName() + "request success: {}", result);
             deferred.setResult(result);
         } catch (Exception e) {

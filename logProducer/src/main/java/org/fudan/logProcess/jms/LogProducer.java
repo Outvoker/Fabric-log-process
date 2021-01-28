@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class LogProducer1 {
+public class LogProducer {
 
     /**
      * DefaultMQProducer
@@ -30,12 +30,12 @@ public class LogProducer1 {
     /**
      *  Construction method
      */
-    public LogProducer1(){
-        producer = new DefaultMQProducer(JmsConfigLogProducer1.PRODUCER_GROUP);
+    public LogProducer(){
+        producer = new DefaultMQProducer(JmsConfigLogProducer.PRODUCER_GROUP);
         //  If the VIP channel is not opened, the open port will be reduced by 2
         producer.setVipChannelEnabled(false);
         //  Bind name server
-        producer.setNamesrvAddr(JmsConfigLogProducer1.NAME_SERVER);
+        producer.setNamesrvAddr(JmsConfigLogProducer.NAME_SERVER);
         start();
     }
 
@@ -59,7 +59,7 @@ public class LogProducer1 {
     public CommonResult<?> request(String tag, String msg){
         Message requestResult;
         try {
-            requestResult = producer.request(new Message(JmsConfigLogProducer1.TOPIC, tag, msg.getBytes()), JmsConfigLogProducer1.TIMEOUT);
+            requestResult = producer.request(new Message(JmsConfigLogProducer.TOPIC, tag, msg.getBytes()), JmsConfigLogProducer.TIMEOUT);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +92,7 @@ public class LogProducer1 {
     public CommonResult<?> send(String tag, String msg){
         SendResult sendResult;
         try {
-            sendResult = producer.send(new Message(JmsConfigLogProducer1.TOPIC, tag, msg.getBytes()));
+            sendResult = producer.send(new Message(JmsConfigLogProducer.TOPIC, tag, msg.getBytes()));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,7 +120,7 @@ public class LogProducer1 {
         SendResult sendResult;
         try {
             Collection<Message> messages = new ArrayList<>();
-            for(String msg : msgList) messages.add(new Message(JmsConfigLogProducer1.TOPIC, tag, msg.getBytes()));
+            for(String msg : msgList) messages.add(new Message(JmsConfigLogProducer.TOPIC, tag, msg.getBytes()));
             sendResult = producer.send(messages);
         } catch (Exception e) {
             e.printStackTrace();
