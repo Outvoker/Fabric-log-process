@@ -12,6 +12,7 @@ import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.jms.LogReplyProducer;
 import org.fudan.logProcess.logConfig.LogConfig;
 import org.fudan.logProcess.service.LogIndexDataBaseService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import javax.management.ObjectName;
@@ -43,13 +44,14 @@ public class LogBucket {
      */
     private List<Message> messages;
 
-    @Resource
-    LogReplyProducer logReplyProducer;
-
-    @Resource
     LogIndexDataBaseService logIndexDataBaseService;
 
-    public LogBucket(LogConfig logConfig, HashSet<String> set, HashMap<HashSet<String>, LogBucket> map, String keyNum){
+    LogReplyProducer logReplyProducer;
+
+    public LogBucket(LogConfig logConfig, HashSet<String> set, HashMap<HashSet<String>, LogBucket> map, String keyNum, LogIndexDataBaseService logIndexDataBaseService, LogReplyProducer logReplyProducer){
+
+        this.logIndexDataBaseService = logIndexDataBaseService;
+        this.logReplyProducer = logReplyProducer;
 
         this.messages = new ArrayList<>();
 
@@ -321,9 +323,13 @@ public class LogBucket {
 
             MergedIndexItem item = new MergedIndexItem(para[1]);
 
-            /**
-             * // TODO: 2021/1/28  把所有的original key写道item里 测试流程。
-             */
+            for(int i = 0; i < list.size(); i++){
+                item.add(list.get(i).get(0), i);
+            }
+
+            log.info(item.getDBMap().toString());
+
+            logIndexDataBaseService.saveLog("1111", "2222", 3);
 
             logIndexDataBaseService.saveBatch(item.getDBMap());
 
