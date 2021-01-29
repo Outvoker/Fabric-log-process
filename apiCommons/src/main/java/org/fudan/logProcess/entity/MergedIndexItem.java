@@ -15,13 +15,14 @@ public class MergedIndexItem {
     private static final String key1 = "integratedKey";
     private static final String key2 = "originalKeyIndex";
 
-    private static Map<String, Integer> originalKeyIndexMap = new HashMap<>();
-    private static Map<String, Object> DBParamMap = new HashMap<String, Object>(){{
-        put(key2, originalKeyIndexMap);
-    }};
+    private Map<String, Integer> originalKeyIndexMap;
+    private Map<String, Object> DBParamMap;
 
     public MergedIndexItem(String integratedKey){
+        originalKeyIndexMap = new HashMap<>();
+        DBParamMap = new HashMap<>();
         DBParamMap.put(key1, integratedKey);
+        DBParamMap.put(key2, originalKeyIndexMap);
     }
 
     public void add(String originalKey, Integer index){

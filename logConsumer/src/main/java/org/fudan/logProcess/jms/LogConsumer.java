@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 @Component
 public class LogConsumer {
 
-    @Resource(name="test")
+    @Resource(name="logProcess")
     private LogProcessService logProcessService;
 
     /**

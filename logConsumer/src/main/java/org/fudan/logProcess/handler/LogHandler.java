@@ -3,8 +3,12 @@ package org.fudan.logProcess.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.fudan.logProcess.jms.LogReplyProducer;
 import org.fudan.logProcess.logConfig.LogConfig;
+import org.fudan.logProcess.service.LogIndexDataBaseService;
+import org.fudan.logProcess.service.LogProcessService;
 
+import javax.annotation.Resource;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -12,7 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
-public class LogHandler{
+public class LogHandler implements LogProcessService {
+
+    @Resource
+    LogIndexDataBaseService logIndexDataBaseService;
+
+    @Resource
+    LogReplyProducer logReplyProducer;
+
 //    private static SdkDemo s;
     private static int totalNum = 0;
 
@@ -52,7 +63,7 @@ public class LogHandler{
 
 
         if(!map.containsKey(set)){  //add a new merging item
-            LogBucket bucket = new LogBucket(this.logConfig, set, map, Thread.currentThread().getName() + getKeyNum());
+            LogBucket bucket = new LogBucket(this.logConfig, set, map, Thread.currentThread().getName() + getKeyNum(), logIndexDataBaseService, logReplyProducer);
             map.put(set, bucket);
             bucket.addMergedItem(msg, datas);
         } else {    //if there is an item already
@@ -62,7 +73,10 @@ public class LogHandler{
         }
     }
 
-    public LogHandler(String path) throws FileNotFoundException {
+    public LogHandler(String path, LogIndexDataBaseService logIndexDataBaseService, LogReplyProducer logReplyProducer) throws FileNotFoundException {
+        this.logIndexDataBaseService = logIndexDataBaseService;
+        this.logReplyProducer = logReplyProducer;
+
         this.logConfig = new LogConfig(path); //load policy
 
 //        s = new SdkDemo();  //new fabric java sdk demo
