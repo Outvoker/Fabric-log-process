@@ -1,16 +1,25 @@
-package org.fudan.logProcess.service;
+package org.fudan.logProcess.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.exception.RemotingException;
+import org.fudan.logProcess.entity.CommonResult;
+import org.fudan.logProcess.entity.MergedIndexItem;
+import org.fudan.logProcess.error.BaseError;
+import org.fudan.logProcess.jms.LogReplyProducer;
 import org.fudan.logProcess.logConfig.LogConfig;
+import org.fudan.logProcess.service.LogIndexDataBaseService;
 
+import javax.annotation.Resource;
+import javax.management.ObjectName;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * @author Xu Rui
- * @date 2021/1/25 12:00
- */
+@Slf4j
 public class LogBucket {
     private LogConfig logConfig;    //policy
 
@@ -29,8 +38,20 @@ public class LogBucket {
 
     private ArrayList<String> filteredItem;
 
+    /**
+     * messages that need to reply
+     */
+    private List<Message> messages;
+
+    @Resource
+    LogReplyProducer logReplyProducer;
+
+    @Resource
+    LogIndexDataBaseService logIndexDataBaseService;
 
     public LogBucket(LogConfig logConfig, HashSet<String> set, HashMap<HashSet<String>, LogBucket> map, String keyNum){
+
+        this.messages = new ArrayList<>();
 
         this.logConfig = logConfig;
         this.set = set;
@@ -152,9 +173,21 @@ public class LogBucket {
         }
     }
 
-    public void addMergedItem(String[] logItem) throws Exception {
+    public void addMergedItem(Message msg , String[] logItem)  {
         //handle filteredItem
-        changeFilteredItem(logItem);
+        try {
+            changeFilteredItem(logItem);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                logReplyProducer.reply(msg, new CommonResult<>(BaseError.CONSUME_ERROR, e.getMessage()).toString());
+            } catch (Exception ee){
+                ee.printStackTrace();
+            }
+            return;
+        }
+
+        messages.add(msg);
         //handle list
         if(logConfig.getHandler().getMergedItemRule().compareTo("single") == 0) {
             ArrayList<String> arr = new ArrayList<>();
@@ -286,6 +319,15 @@ public class LogBucket {
             System.out.println("key: " + para[1]);
             System.out.println("value: " + para[2]);
 
+            MergedIndexItem item = new MergedIndexItem(para[1]);
+
+            /**
+             * // TODO: 2021/1/28  把所有的original key写道item里 测试流程。
+             */
+
+            logIndexDataBaseService.saveBatch(item.getDBMap());
+
+            logReplyProducer.reply(messages, new CommonResult<>(BaseError.CONSUME_SUCCESS, messages).toString());
 
             System.out.println("#################################################################");
             this.map.remove(this.set);    //remove itself after upload

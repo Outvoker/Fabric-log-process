@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.jms.LogProducer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 public class LogTaskService {
 
-    @Autowired
+    @Resource
     LogProducer logProducer;
 
     /**

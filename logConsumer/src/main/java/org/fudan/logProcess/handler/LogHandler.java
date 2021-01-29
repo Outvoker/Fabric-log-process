@@ -1,17 +1,18 @@
-package org.fudan.logProcess.service;
+package org.fudan.logProcess.handler;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.fudan.logProcess.logConfig.LogConfig;
 
 import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-/**
- * @author Xu Rui
- * @date 2021/1/25 11:59
- */
-public class LogHandler implements NewLineHandler{
+@Slf4j
+public class LogHandler{
 //    private static SdkDemo s;
     private static int totalNum = 0;
 
@@ -39,7 +40,10 @@ public class LogHandler implements NewLineHandler{
         return logConfig;
     }
 
-    public void logProcess(String log) throws Exception {   //process the log
+    public void logProcess(Message msg)  {   //process the log
+
+        String log = new String(msg.getBody(), StandardCharsets.UTF_8);
+
         String[] datas = log.split(this.logConfig.getInfo().getSeparator());
         HashSet<String> set = new HashSet<>();
         for(int idx : this.logConfig.getHandler().getMergedDependenceIndex()){
@@ -50,10 +54,10 @@ public class LogHandler implements NewLineHandler{
         if(!map.containsKey(set)){  //add a new merging item
             LogBucket bucket = new LogBucket(this.logConfig, set, map, Thread.currentThread().getName() + getKeyNum());
             map.put(set, bucket);
-            bucket.addMergedItem(datas);
+            bucket.addMergedItem(msg, datas);
         } else {    //if there is an item already
             synchronized (map.get(set).uploadLock) {
-                map.get(set).addMergedItem(datas);
+                map.get(set).addMergedItem(msg, datas);
             }
         }
     }
@@ -73,20 +77,15 @@ public class LogHandler implements NewLineHandler{
         map = new HashMap<>();
     }
 
-    @Override
-    public void handle(List<String> lines) throws Exception {
-        System.out.println("receive data:" + lines.size());
-        totalNum += lines.size();
+    public void handle(List<MessageExt> messages) {
+        System.out.println("receive data:" + messages.size());
+        totalNum += messages.size();
 
-        for(String log : lines) {   //process the log in lines
-            logProcess(log);
+        for(Message msg : messages) {   //process the log in lines
+            logProcess(msg);
         }
         System.out.println(Thread.currentThread().getName() + "totalNum is : " + totalNum);
 
     }
 
-    @Override
-    public void handle(String line) throws Exception {
-        logProcess(line);
-    }
 }
