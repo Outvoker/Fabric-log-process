@@ -33,7 +33,7 @@ public class LogProcessServiceTestImpl implements LogProcessService {
     LogReplyProducer logReplyProducer;
 
     @Override
-    public boolean handle(List<MessageExt> messageExts, ConsumeConcurrentlyContext context) {
+    public Boolean handle(List<MessageExt> messageExts, ConsumeConcurrentlyContext context) {
         for (Message msg : messageExts) {
 
             try {

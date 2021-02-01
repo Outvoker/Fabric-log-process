@@ -10,5 +10,5 @@ import java.util.List;
  * @date 2021/1/27 16:48
  */
 public interface LogProcessService {
-    boolean handle(List<MessageExt> messageExts, ConsumeConcurrentlyContext context);
+    Boolean handle(List<MessageExt> messageExts, ConsumeConcurrentlyContext context);
 }

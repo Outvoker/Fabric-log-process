@@ -6,6 +6,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.common.message.Message;
 import org.fudan.logProcess.service.LogProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ import javax.annotation.Resource;
 @Component
 public class LogConsumer {
 
-    @Resource(name="logProcess")
+    @Resource(name="logHandler")
     private LogProcessService logProcessService;
 
     /**
@@ -49,6 +50,7 @@ public class LogConsumer {
 
             if(logProcessService.handle(msgs, context)) return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;   //  consume success
             else return ConsumeConcurrentlyStatus.RECONSUME_LATER;  //  consume failed, reconsume later
+
 
         });
 
