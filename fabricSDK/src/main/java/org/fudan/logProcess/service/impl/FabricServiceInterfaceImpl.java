@@ -133,9 +133,9 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
 
         try {
             // TODO: 修改相应的智能合约
-            Transaction transaction = contract.createTransaction("invoke");
+            Transaction transaction = contract.createTransaction("putData");
             transaction.setEndorsingPeers(channel.getPeers());
-            transaction.submit("a", blockchainLog.getKey(), blockchainLog.getValue());
+            transaction.submit(blockchainLog.getKey(), blockchainLog.getValue());
 
             log.info("invoke in blockchain");
             deferred.setResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS, blockchainLog));
