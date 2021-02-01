@@ -3,7 +3,8 @@ package org.fudan.logProcess.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
-import org.fudan.logProcess.service.LogTaskService;
+import org.fudan.logProcess.service.LogMultiTaskService;
+import org.fudan.logProcess.service.LogSingleTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -19,7 +20,10 @@ import java.util.List;
 public class LogProducerController {
 
     @Autowired
-    LogTaskService logTaskService;
+    LogSingleTaskService logSingleTaskService;
+
+    @Autowired
+    LogMultiTaskService logMultiTaskService;
 
     /**
      * Push one log.
@@ -33,7 +37,7 @@ public class LogProducerController {
         // timeout with 3 * 1000 ms
         DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(3*1000L);
         //  Asynchronously call
-        logTaskService.request(deferredResult, aLog);
+        logSingleTaskService.request(deferredResult, aLog);
 
         // timeout callback method
         deferredResult.onTimeout(() -> {
@@ -56,7 +60,7 @@ public class LogProducerController {
         DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(20*1000L);
 
         //  Asynchronously call
-        logTaskService.request(deferredResult, logs);
+        logMultiTaskService.request(deferredResult, logs);
 
         // timeout callback method
         deferredResult.onTimeout(() -> {

@@ -14,55 +14,38 @@ import java.util.*;
 public class LogBucket {
     private LogConfig logConfig;    //policy
 
-    private HashSet<String> set;
-    private HashMap<HashSet<String>, LogBucket> map;
-
     private JSONObject jsonObject;
     private ArrayList<ArrayList<String>> list;
     private int size;
     private int count;
     public final Object uploadLock = new Object();
-    private boolean isUploaded = false;
-    private Timer uploadTimer;
+    public boolean isUploaded = false;
     private String keyNum;
+
+    private String collectionName;
+    private String keyName;
 
 
     private ArrayList<String> filteredItem;
 
 
-    public LogBucket(LogConfig logConfig, HashSet<String> set, HashMap<HashSet<String>, LogBucket> map, String keyNum){
+
+    public LogBucket(LogConfig logConfig, String keyNum){
+
+        this.messages = new ArrayList<>();
 
         this.logConfig = logConfig;
-        this.set = set;
-        this.map = map;
 
         this.jsonObject = new JSONObject();
-        if(logConfig.getHandler().getMergedItemRule().compareTo("single") == 0) {
-            this.list = new ArrayList<>();
-        } else if (logConfig.getHandler().getMergedItemRule().compareTo("multi") == 0) {
-            this.list = new ArrayList<>();
-            for(int i = 0; i < this.logConfig.getHandler().getMergedItemIndex().size(); i++) {
-                this.list.add(new ArrayList<>());
-            }
-        }
+
+        this.list = new ArrayList<>();
+
         this.count = 0;
         this.size = 0;
         this.keyNum = keyNum;
 
         this.filteredItem = new ArrayList<>(logConfig.getHandler().getFilteredItem().size());
 
-        if (logConfig.getSender().getTime() != 0 ){
-            this.uploadTimer = new Timer("timer" + this.set.toString() );   //a timer that control the bucket uploading when time is over
-            this.uploadTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    System.out.println("time is over!");
-                    synchronized (uploadLock) { //this lock avoids the situation that time is over and at the same time bucket is full
-                        upload();
-                    }
-                }
-            }, logConfig.getSender().getTime());
-        }
     }
 
     public String filteredItemHandler(String originalItem, String item, String type, String rule) throws Exception{
@@ -138,67 +121,32 @@ public class LogBucket {
             String item = filteredItemHandler(this.filteredItem.get(i),logItem[filteredItemIndex.get(i)], type.get(i), rule.get(i));
             this.filteredItem.set(i, item);
         }
-        if(this.size == 0) {
-            int temp = 0;
-            for(int idx : logConfig.getHandler().getFilteredItemIndex()) {
-                temp += logConfig.getHandler().getOriginalItem().get(idx).getBytes(StandardCharsets.UTF_8).length;
-                temp += logItem[idx].getBytes(StandardCharsets.UTF_8).length;
-            }
-            for(int idx : logConfig.getHandler().getMergedItemIndex()) {
-                temp += logConfig.getHandler().getOriginalItem().get(idx).getBytes(StandardCharsets.UTF_8).length;
-            }
-            temp += (filteredItem.size() + this.logConfig.getHandler().getMergedItem().size() * 2) * 6 + 20;
-            this.size += temp;
-        }
     }
 
-    public void addMergedItem(String[] logItem) throws Exception {
-        //handle filteredItem
-        changeFilteredItem(logItem);
-        //handle list
-        if(logConfig.getHandler().getMergedItemRule().compareTo("single") == 0) {
+    public boolean addMergedItem(Message msg , String[] logItem)  {
+        synchronized (this.uploadLock) {
+            //handle filteredItem
+            try {
+                changeFilteredItem(logItem);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            messages.add(msg);
+            //handle list
             ArrayList<String> arr = new ArrayList<>();
             for(int idx : this.logConfig.getHandler().getMergedItemIndex()) {
                 arr.add(logItem[idx]);
-                this.size += logItem[idx].getBytes(StandardCharsets.UTF_8).length + 3;
             }
             this.list.add(arr);
             this.count++;
             if(this.list.size() >= this.logConfig.getSender().getNum() && this.list.size() != 0) {   //the number of list is met num in the policy
                 System.out.println("#################################################################");
                 System.out.printf("bucket is full: %d\n", this.list.size());
-                synchronized (uploadLock) {
-                    upload();
-                }
+                return true;
             }
-            if(logConfig.getSender().getSize() * 1000 <= this.size && logConfig.getSender().getSize() != 0) {   //the size of list is met size in the policy
-                System.out.println("#################################################################");
-                System.out.printf("bucket Bytes is full: %d\n", this.size);
-                synchronized (uploadLock) {
-                    upload();
-                }
-            }
-        } else if (logConfig.getHandler().getMergedItemRule().compareTo("multi") == 0) {
-            List<Integer> mergedItemIndex = this.logConfig.getHandler().getMergedItemIndex();
-            for(int i = 0; i < mergedItemIndex.size(); i++) {
-                this.list.get(i).add(logItem[mergedItemIndex.get(i)]);
-                this.count++;
-                this.size += logItem[mergedItemIndex.get(i)].getBytes(StandardCharsets.UTF_8).length + 3;
-            }
-            if(this.list.get(0).size() >= this.logConfig.getSender().getNum() && this.list.size() != 0) {
-                System.out.println("#################################################################");
-                System.out.printf("bucket is full: %d\n", this.list.get(0).size());
-                synchronized (uploadLock) {
-                    upload();
-                }
-            }
-            if(logConfig.getSender().getSize() * 1000 <= this.size && logConfig.getSender().getSize() != 0) {
-                System.out.println("#################################################################");
-                System.out.printf("bucket Bytes is full: %d\n", this.size);
-                synchronized (uploadLock) {
-                    upload();
-                }
-            }
+            return false;
         }
 
     }
@@ -213,16 +161,8 @@ public class LogBucket {
         }
 
         //add list into jsonObject
-        if(logConfig.getHandler().getMergedItemRule().compareTo("single") == 0) {
-            this.jsonObject.put("count", this.list.size());
-            this.jsonObject.put("list", this.list);
-        }else if (logConfig.getHandler().getMergedItemRule().compareTo("multi") == 0) {
-            List<Integer> mergedItemIndex = this.logConfig.getHandler().getMergedItemIndex();
-            for(int i = 0; i < mergedItemIndex.size(); i++) {
-                this.jsonObject.put("count" + originalItem.get(mergedItemIndex.get(i)), this.list.get(i).size());
-                this.jsonObject.put(originalItem.get(mergedItemIndex.get(i)), this.list.get(i));
-            }
-        }
+        this.jsonObject.put("count", this.list.size());
+        this.jsonObject.put("list", this.list);
 
     }
 
@@ -244,7 +184,9 @@ public class LogBucket {
         for(String str : collectionConcat)
             res.append(str);
 
-        return res.toString();
+        this.collectionName = res.toString();
+
+        return this.collectionName;
     }
 
     public String keyPolicy() {
@@ -262,36 +204,38 @@ public class LogBucket {
 
         keyPolicyId = keyPolicyId.concat(this.keyNum);      //threadLocal num
 
+        this.keyName = keyPolicyId;
+
         return keyPolicyId;
     }
 
-    private void clear() {
-        //clear the timer when the bucket is uploaded
-        if(this.logConfig.getSender().getTime() != 0) this.uploadTimer.cancel();
+    public List<String> getBlockchainParams(){
+        packageBucket();    //add item into jsonObject
+        List<String> params = new ArrayList<>();
+        params.add(keyPolicy());
+        params.add(this.jsonObject.toJSONString());
+        return params;
     }
-    public void upload(){
-        try {
-            if(isUploaded) return;
-            else isUploaded = true;
-            packageBucket();    //add item into jsonObject
 
-            String[] para = new String[3];
-            para[0] = collectionPolicy();  //collection
-            para[1] = keyPolicy(); // key = keyPolicy + system time + treadLocal num
-            para[2] = this.jsonObject.toJSONString();    //invoke json
+    public List<String> getBlockchainPDCParams(){
+        packageBucket();    //add item into jsonObject
+        List<String> params = new ArrayList<>();
+        params.add(collectionPolicy());
+        params.add(keyPolicy());
+        params.add(this.jsonObject.toJSONString());
+        return params;
+    }
 
-//            LogHandler.getS().invoke("myChannel", "putPrivateData", para); //invoke
-            System.out.println("invoke:");
-            System.out.println("collection: " + para[0]);
-            System.out.println("key: " + para[1]);
-            System.out.println("value: " + para[2]);
-
-
-            System.out.println("#################################################################");
-            this.map.remove(this.set);    //remove itself after upload
-            this.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public Map<String, Object> getLogIndexDBParam(){
+        MergedIndexItem item = new MergedIndexItem(this.keyName);
+        for(int i = 0; i < list.size(); i++){
+            item.add(list.get(i).get(0), i);
         }
+        return item.getDBMap();
     }
+
+    public List<Message> getMessages(){
+        return this.messages;
+    }
+
 }
