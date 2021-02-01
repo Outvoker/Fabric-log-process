@@ -12,3 +12,4 @@ eureka:
       defaultZone: http://localhost:27001/eureka
   instance:
     instance-id: logConsumer
+
