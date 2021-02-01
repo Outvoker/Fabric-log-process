@@ -26,6 +26,8 @@ public class LogHandler implements LogProcessService{
 
     private static final String policyPath = "D:\\university\\blockchain\\logProcess\\logConsumer\\src\\main\\resources\\test.yml";
 
+    private static Integer times = 0;
+
     @Resource
     LogIndexDataBaseService logIndexDataBaseService;
 
@@ -68,10 +70,17 @@ public class LogHandler implements LogProcessService{
      */
     public void upload(LogBucket bucket, HashSet<String> set){
         synchronized (bucket.uploadLock) { //this lock avoids the situation that time is over and at the same time bucket is full
+            if(bucket.isUploaded) return;
+            bucket.isUploaded = true;
+
             //  write into blockchain
             log.info("getBlockchainParams = {}", bucket.getBlockchainParams());
             //  write into index DB
             log.info("getLogIndexDBParam = {}", bucket.getLogIndexDBParam());
+            synchronized (times){
+                times += ((Map)bucket.getLogIndexDBParam().get("originalKeyIndex")).size();
+                log.info("upload times = {}", times);
+            }
             CommonResult<?> result = logIndexDataBaseService.saveBatch(bucket.getLogIndexDBParam());
             //  reply the /log producer
             log.info("getMessages = {}", bucket.getMessages());
@@ -86,7 +95,7 @@ public class LogHandler implements LogProcessService{
     }
 
 
-    public void logProcess(Message msg)  {   //process the log
+    public void  logProcess(Message msg)  {   //process the log
 
         String aLog = new String(msg.getBody(), StandardCharsets.UTF_8);
 
@@ -117,8 +126,12 @@ public class LogHandler implements LogProcessService{
         }
 
         LogBucket bucket = map.get(set);
+
         synchronized (bucket.uploadLock){
-            if(bucket.isUploaded) logProcess(msg);
+            if(bucket.isUploaded) {
+                logProcess(msg);
+                return;
+            }
             log.info("write into bucket = {}", set);
             boolean flag = bucket.addMergedItem(msg, datas);    //  if bucket is full;
             if(flag) {

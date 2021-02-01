@@ -212,9 +212,9 @@ public class LogBucket {
             keyPolicyId = keyPolicyId.concat(this.jsonObject.get(str).toString());
         }
 
-        SimpleDateFormat formatter= new SimpleDateFormat("yyyyMMddHHmmss");     //time
-        Date date = new Date(System.currentTimeMillis());
-        keyPolicyId = keyPolicyId.concat(formatter.format(date));
+//        SimpleDateFormat formatter= new SimpleDateFormat("yyyyMMddHHmmss");     //time
+//        Date date = new Date(System.currentTimeMillis());
+//        keyPolicyId = keyPolicyId.concat(formatter.format(date));
 
         keyPolicyId = keyPolicyId.concat(this.keyNum);      //threadLocal num
 

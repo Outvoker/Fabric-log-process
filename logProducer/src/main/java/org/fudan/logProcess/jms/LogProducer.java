@@ -51,7 +51,8 @@ public class LogProducer {
     }
 
     /**
-     * Send request message in synchronous mode. This method returns only when the consumer consume the request message and reply a message.
+     * Send request message in synchronous mode.
+     * This method returns only when the consumer consume the request message and reply a message.
      * @param tag   tag
      * @param msg   msg
      * @return      CommonResult
