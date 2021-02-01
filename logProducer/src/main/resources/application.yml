@@ -1,2 +1,15 @@
 server:
   port: 28001
+
+Spring:
+  application:
+    name: logProducer
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:27001/eureka
+  instance:
+    instance-id: logProducer

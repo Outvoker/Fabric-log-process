@@ -1,0 +1,12 @@
+server:
+  port: 8001
+
+Spring:
+  application:
+    name: webService
+
+eureka:
+  client:
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://localhost:27001/eureka
