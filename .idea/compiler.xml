@@ -16,8 +16,5 @@
         <module name="eurekaServer" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="fabricSDK" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
