@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @RestController
 @Slf4j
-public class LogIndexDBController {
+public class LogProcessController {
 
     @Resource
     ILogService logService;
@@ -84,9 +84,8 @@ public class LogIndexDBController {
             logObject.setOriginalKey(key);
             logObject.setIntegratedKey(integratedKey);
             logObject.setIdx(value);
-//            if(logService.exist(key)) failedLogs.add(logObject);
-//            else logBatch.add(logObject);
-            logBatch.add(logObject);
+            if(logService.exist(key)) failedLogs.add(logObject);
+            else logBatch.add(logObject);
         }
 
         if(!logService.saveBatch(logBatch)) return new CommonResult<>(BaseError.CREATE_ERROR, logBatch);

@@ -4,13 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.jms.LogProducer;
+<<<<<<< HEAD
 import org.springframework.beans.factory.annotation.Autowired;
+=======
+>>>>>>> parent of dada66b... Merge branch 'main' of https://github.com/Outvoker/Fabric-log-process into main
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
+=======
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+>>>>>>> parent of dada66b... Merge branch 'main' of https://github.com/Outvoker/Fabric-log-process into main
 
 /**
  * @Description log process task service
@@ -20,7 +30,11 @@ import java.util.List;
 @Slf4j
 public class LogTaskService {
 
+<<<<<<< HEAD
     @Autowired
+=======
+    @Resource
+>>>>>>> parent of dada66b... Merge branch 'main' of https://github.com/Outvoker/Fabric-log-process into main
     LogProducer logProducer;
 
     /**
