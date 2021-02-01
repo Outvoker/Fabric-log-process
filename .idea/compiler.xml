@@ -6,10 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="logIndexDataBase" />
+        <module name="apiCommons" />
+        <module name="webService" />
         <module name="logProducer" />
-        <module name="cloud-api-logProcess" />
         <module name="logConsumer" />
+        <module name="logIndexDataBase" />
+        <module name="cloud-api-logProcess" />
         <module name="eurekaServer" />
       </profile>
     </annotationProcessing>

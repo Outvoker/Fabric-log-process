@@ -1,5 +1,8 @@
 package org.fudan.logProcess.logConfig;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -12,6 +15,9 @@ import java.util.Map;
 /**
  * Created by Elegenthus on 2020/7/17.
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class LogConfig {
     private  String name;
     private int version;
@@ -20,98 +26,26 @@ public class LogConfig {
     private Sender sender;
     private Handler handler;
 
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public Info getInfo() {
-        return info;
-    }
-
-    public void setInfo(Info info) {
-        this.info = info;
-    }
-
-    public Sender getSender() {
-        return sender;
-    }
-
-    public void setSender(Sender sender) {
-        this.sender = sender;
-    }
-
-    public Handler getHandler() {
-        return handler;
-    }
-
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Info{
         private String separator;
         private String filePath;
-
-        public String getSeparator() {
-            return separator;
-        }
-
-        public void setSeparator(String separator) {
-            this.separator = separator;
-        }
-
-        public String getFilePath() {
-            return filePath;
-        }
-
-        public void setFilePath(String filePath) {
-            this.filePath = filePath;
-        }
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Sender{
         private int time;
         private int size;
         private int num;
-
-        public int getTime() {
-            return time;
-        }
-
-        public void setTime(int time) {
-            this.time = time;
-        }
-
-        public int getSize() {
-            return size;
-        }
-
-        public void setSize(int size) {
-            this.size = size;
-        }
-
-        public int getNum() {
-            return num;
-        }
-
-        public void setNum(int num) {
-            this.num = num;
-        }
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Handler{
         private String mergedItemRule;
         private List<String> mergedDependence;
@@ -135,20 +69,12 @@ public class LogConfig {
         private String keyPolicyId;
 
 
-        public String getMergedItemRule(){ return mergedItemRule;}
-
-        public void setMergedItemRule(String mergedItemRule){ this.mergedItemRule = mergedItemRule; }
-
-        public List<Integer> getMergedDependenceIndex(){ return mergedDependenceIndex; }
-
         public void setMergedDependenceIndex(List<String> mergedDependence){
             this.mergedDependenceIndex = new ArrayList<>();
             for(int i = 0; i < mergedDependence.size(); i++){
                 this.mergedDependenceIndex.add(originalItem.indexOf(mergedDependence.get(i)));
             }
         }
-
-        public List<Integer> getFilteredItemIndex(){ return filteredItemIndex; }
 
         public void setFilteredItemIndex(List<Map> filteredItem){
             this.filteredItemIndex = new ArrayList<>();
@@ -158,8 +84,6 @@ public class LogConfig {
             }
         }
 
-        public List<Integer> getMergedItemIndex(){ return mergedItemIndex; }
-
         public void setMergedItemIndex(List<String> mergedItem){
             this.mergedItemIndex = new ArrayList<>();
             for(int i = 0; i < mergedItem.size(); i++){
@@ -167,19 +91,15 @@ public class LogConfig {
             }
         }
 
-        public List<String> getCollectionNamePrefix(){ return collectionNamePrefix; }
-
         public void setCollectionNamePrefix(Map collectionName ){
             this.collectionNamePrefix = (List<String>) collectionName.get("prefix");
         }
 
-        public List<String> getCollectionNameFields() { return collectionNameFields; }
 
         public void setCollectionNameFields(Map collectionName){
             this.collectionNameFields = (List<String>) collectionName.get("fields");
         }
 
-        public List<String> getKeyPolicyFields() { return keyPolicyFields; }
 
         public void setKeyPolicyFields(Map keyPolicy) {
             this.keyPolicyFields = (List<String>) keyPolicy.get("fields");
@@ -187,43 +107,10 @@ public class LogConfig {
             System.out.println("fields: " + keyPolicy.get("fields"));
         }
 
-        public String getKeyPolicyId() { return keyPolicyId; }
 
         public void setKeyPolicyId(Map keyPolicy){
             this.keyPolicyId = (String) keyPolicy.get("id");
         }
-
-        public Map getCollectionName() { return collectionName; }
-
-        public void setCollectionName(Map collectionName){ this.collectionName = collectionName; }
-
-        public Map getKeyPolicy() { return keyPolicy; }
-
-        public void setKeyPolicy(Map keyPolicy) { this.keyPolicy = keyPolicy; }
-
-        public List<String> getMergedDependence() {
-            return mergedDependence;
-        }
-
-        public void setMergedDependence(List<String> mergedDependence) {
-            this.mergedDependence = mergedDependence;
-        }
-
-        public List<String> getOriginalItem() {
-            return originalItem;
-        }
-
-        public void setOriginalItem(List<String> originalItem) {
-            this.originalItem = originalItem;
-        }
-
-        public List<Map> getFilteredItem() { return filteredItem; }
-
-        public void setFilteredItem(List<Map> filteredItem) {
-            this.filteredItem = filteredItem;
-        }
-
-        public List<String> getFilteredItemField() { return filteredItemField; }
 
         public void setFilteredItemField(List<Map> filteredItem) {
             this.filteredItemField = new ArrayList<>();
@@ -232,16 +119,12 @@ public class LogConfig {
             }
         }
 
-        public List<String> getFilteredItemName() { return filteredItemName; }
-
         public void setFilteredItemName(List<Map> filteredItem){
             this.filteredItemName = new ArrayList<>();
             for(int i = 0; i < filteredItem.size(); i++){
                 this.filteredItemName.add((String) filteredItem.get(i).get("item"));
             }
         }
-
-        public List<String> getFilteredItemType() { return filteredItemType; }
 
         public void setFilteredItemType(List<Map> filteredItem) {
             this.filteredItemType = new ArrayList<>();
@@ -250,21 +133,11 @@ public class LogConfig {
             }
         }
 
-        public List<String> getFilteredItemRule() { return filteredItemRule; }
-
         public void setFilteredItemRule(List<Map> filteredItem) {
             this.filteredItemRule = new ArrayList<>();
             for(int i = 0; i < filteredItem.size(); i++){
                 this.filteredItemRule.add((String)filteredItem.get(i).get("rule"));
             }
-        }
-
-        public List<String> getMergedItem() {
-            return mergedItem;
-        }
-
-        public void setMergedItem(List<String> mergedItem) {
-            this.mergedItem = mergedItem;
         }
 
 
