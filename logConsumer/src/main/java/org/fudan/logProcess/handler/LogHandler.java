@@ -78,7 +78,7 @@ public class LogHandler implements LogProcessService{
             //  write into index DB
             log.info("getLogIndexDBParam = {}", bucket.getLogIndexDBParam());
             synchronized (times){
-                times += ((Map)bucket.getLogIndexDBParam().get("originalKey")).size();
+                times += ((Map)bucket.getLogIndexDBParam().get("originalKeyIndex")).size();
                 log.info("upload times = {}", times);
             }
             CommonResult<?> result = logIndexDataBaseService.saveBatch(bucket.getLogIndexDBParam());
