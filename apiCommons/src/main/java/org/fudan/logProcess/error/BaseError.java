@@ -43,7 +43,14 @@ public enum BaseError {
 
     //  handle
     HANDLE_ERROR(40700, "handle error"),
-    EXCEPTION_ERROR(40401, "exception error");
+    EXCEPTION_ERROR(40401, "exception error"),
+
+    // blockchain
+    BLOCKCHAIN_QUERY_SUCCESS(20800, "query blockchain success"),
+    BLOCKCHAIN_QUERY_ERROR(40800, "query blockchain error"),
+    BLOCKCHAIN_INVOKE_SUCCESS(20801, "invoke blockchain success"),
+    BLOCKCHAIN_INVOKE_ERROR(40800, "invoke blockchain error"),
+    BLOCKCHAIN_INVOKE_TIMEOUT_ERROR(40080, "invoke timeout");
 
     private int code;
     private String msg;

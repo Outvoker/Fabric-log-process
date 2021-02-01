@@ -1,0 +1,15 @@
+server:
+  port: 21001
+
+Spring:
+  application:
+    name: fabricService
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:27001/eureka
+  instance:
+    instance-id: FabricSDK

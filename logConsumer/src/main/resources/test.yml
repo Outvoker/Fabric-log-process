@@ -7,9 +7,9 @@ info:
   filePath: 'D:\\university\\blockchain\\logTest\\'   # file path (should be modified)
 
 sender:         # sending policy, merge multiple logs into one transaction when the following conditions are met
-  time: 300000  # time interval(seconds), setting to 0 means there is no time interval limit
+  time: 3000  # time interval(seconds), setting to 0 means there is no time interval limit
   size: 1000    # transaction size(KB), setting to 0 means there is no transaction size limit
-  num: 3     # number of logs in each transaction, setting to 0 means there is no log number limit in each transaction
+  num: 1000     # number of logs in each transaction, setting to 0 means there is no log number limit in each transaction
 
 handler:
   mergedDependence:   # merging based on this item
