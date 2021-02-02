@@ -18,6 +18,7 @@ public enum BaseError {
 
     //  create
     CREATE_SUCCESS(20200, "Create success"),
+    PUSH_LOG_SUCCESS(20201, "Push log success"),
     CREATE_ERROR(40200, "Create failed"),
     CREATE_ERROR_ALREADY_EXIST(40201, "Original key has already existed"),
     CREATE_ERROR_PART_ALREADY_EXIST(40201, "Part of original keys have already existed"),
@@ -43,7 +44,15 @@ public enum BaseError {
 
     //  handle
     HANDLE_ERROR(40700, "handle error"),
-    EXCEPTION_ERROR(40401, "exception error");
+    EXCEPTION_ERROR(40401, "exception error"),
+
+    // fabric sdk
+    BLOCKCHAIN_INVOKE_TIMEOUT_ERROR(40801, "invoke timeout"),
+    BLOCKCHAIN_INVOKE_ERROR(40802, "invoke error"),
+    BLOCKCHAIN_INVOKE_SUCCESS(20801, "invoke success"),
+    BLOCKCHAIN_QUERY_TIMEOUT_ERROR(40803, "query timeout"),
+    BLOCKCHAIN_QUERY_ERROR(40804, "query error"),
+    BLOCKCHAIN_QUERY_SUCCESS(20802, "query success");
 
     private int code;
     private String msg;

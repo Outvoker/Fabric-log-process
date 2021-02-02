@@ -11,5 +11,5 @@ import org.springframework.web.context.request.async.DeferredResult;
 @FeignClient(value = "LOGPRODUCER")
 public interface LogProducerFeignService {
     @PostMapping("/log/push")
-    public DeferredResult<CommonResult<?>> pushLog(@RequestBody String aLog);
+    DeferredResult<CommonResult<?>> pushLog(@RequestBody String aLog);
 }

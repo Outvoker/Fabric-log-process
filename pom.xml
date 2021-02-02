@@ -13,6 +13,7 @@
         <module>apiCommons</module>
         <module>logIndexDataBase</module>
         <module>eurekaServer</module>
+        <module>fabricSDK</module>
         <module>webService</module>
     </modules>
     <packaging>pom</packaging>
