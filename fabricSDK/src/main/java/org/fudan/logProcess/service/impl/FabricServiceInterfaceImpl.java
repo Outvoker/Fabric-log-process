@@ -1,16 +1,23 @@
 package org.fudan.logProcess.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import javafx.beans.binding.ObjectExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.CommonResult;
+import org.fudan.logProcess.entity.Log;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.service.FabricServiceInterface;
 import org.fudan.logProcess.entity.BlockchainLog;
+import org.fudan.logProcess.service.LogIndexDataBaseService;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +28,10 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @Program: Fabric-log-process
@@ -32,6 +42,9 @@ import java.util.Collection;
 @Slf4j
 @Service("fabricService")
 public class FabricServiceInterfaceImpl implements FabricServiceInterface {
+
+    @Resource
+    LogIndexDataBaseService logIndexDataBaseService;
 
     // K8S
     // connection.json: the connection information of fabric
@@ -97,6 +110,33 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
         }
     }
 
+    public Log queryFromIndexDB(String key) {
+        CommonResult<?> logIndexResult = logIndexDataBaseService.getLogByOriginalKey(key);
+        // TODO: if there is no related log in the db, return error
+        if(logIndexResult.isError()) return null;
+
+        log.info("****************************query merged logID from indexDB {}", logIndexResult.getData());
+
+        return JSON.parseObject(JSON.toJSONString(logIndexResult.getData()), Log.class);
+    }
+
+    public String queryFromBlockchain(String key) {
+        byte[] queryResult = new byte[]{};
+        try {
+            queryResult = contract.evaluateTransaction("getData", key);
+        } catch (ContractException e) {
+            e.printStackTrace();
+        }
+        log.info("****************************query from fabric{}", new String(queryResult, StandardCharsets.UTF_8));
+        return new String(queryResult, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * according to original_key to search mergedLog in the blockchain
+     * @param deferred
+     * @param key the original key
+     * @return the merged log in the blockchain
+     */
     @Async
     @Override
     public BlockchainLog query(DeferredResult<CommonResult<?>> deferred, String key) {
@@ -108,19 +148,35 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
         //    e.printStackTrace();
         //}
 
-        log.info("query");
+
+        // TODO: 处理一下查询index db 失败的情况
+        Log logIndex = queryFromIndexDB(key);
+        if(logIndex == null) return null; // query from index db is error
+
+        // TODO: 根据从处理一下从区块链中查询出来的结果
+        String mergeLogString = queryFromBlockchain(logIndex.getIntegratedKey());
+        Map<String, Object> mergedLogMap = JSONObject.parseObject(mergeLogString);
+
+        // TODO: 对合并后的日志进行分解，拿到最初的日志
+        mergedLogMap.remove("count");
+        JSONArray mergedItems = (JSONArray) mergedLogMap.get("list");
+        //log.info("list class = {}", mergedLogMap.get("list").getClass());
+        Map<String, Object> itsOwnItems = JSON.parseObject(JSON.toJSONString(mergedItems.get(logIndex.getIdx())));
+        for(Map.Entry<String, Object> items : itsOwnItems.entrySet()) {
+            mergedLogMap.put(items.getKey(), items.getValue());
+        }
+        mergedLogMap.remove("list");
+
 
         // TODO: 这里怎么不初始化，利用Spring的机制
         BlockchainLog queryResult = new BlockchainLog();
-        queryResult.setKey(key);
+        queryResult.setKey(logIndex.getIntegratedKey());
         try {
-            log.info("query in blockchain");
-            byte[] queryAResultAfter = contract.evaluateTransaction("query", key);
-            queryResult.setValue(new String(queryAResultAfter, StandardCharsets.UTF_8));
-            log.info("Balance {}: {}", queryResult.getKey(), queryResult.getValue());
+            queryResult.setValue(JSON.toJSONString(mergedLogMap));
+            log.info("************************The key of {} is: {}", queryResult.getKey(), queryResult.getValue());
             deferred.setResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_SUCCESS, queryResult));
         } catch (Exception e) {
-            log.info("queryByPeer Error");
+            log.info("************************queryByPeer Error");
             deferred.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_ERROR, queryResult));
             e.printStackTrace();
         }
@@ -143,8 +199,8 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
             log.info("Invoke Error");
             deferred.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_ERROR, blockchainLog));
             e.printStackTrace();
-            return new Boolean(false);
+            return Boolean.FALSE;
         }
-        return new Boolean(true);
+        return Boolean.TRUE;
     }
 }

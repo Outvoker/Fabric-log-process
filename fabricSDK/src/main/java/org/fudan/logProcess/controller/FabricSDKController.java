@@ -1,10 +1,13 @@
 package org.fudan.logProcess.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.fudan.logProcess.entity.BlockchainLog;
 import org.fudan.logProcess.entity.CommonResult;
+import org.fudan.logProcess.entity.Log;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.service.FabricServiceInterface;
+import org.fudan.logProcess.service.LogIndexDataBaseService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 /**
@@ -69,7 +74,7 @@ public class FabricSDKController {
         // when timeout this callback method
         deferredResult.onTimeout(() -> {
             log.info(Thread.currentThread().getName() + "onTimeout");
-            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_TIMEOUT_ERROR, blockchainLog));
+            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_TIMEOUT_ERROR, blockchainLog));
         });
 
         // when callback method is completed, whether it is timeout or successful, it will enter this callback method

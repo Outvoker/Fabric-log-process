@@ -14,6 +14,7 @@
         <module>logIndexDataBase</module>
         <module>eurekaServer</module>
         <module>webService</module>
+        <module>fabricSDK</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -23,6 +24,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <!--子模块继承之后，提供锁定版本+子module不用谢groupid和version-->
     <dependencyManagement>
         <dependencies>
             <!--spring boot 2.2.2-->
@@ -61,8 +63,6 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>8.0.22</version>
             </dependency>
-
-
         </dependencies>
     </dependencyManagement>
 

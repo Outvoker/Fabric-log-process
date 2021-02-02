@@ -43,7 +43,16 @@ public enum BaseError {
 
     //  handle
     HANDLE_ERROR(40700, "handle error"),
-    EXCEPTION_ERROR(40401, "exception error");
+    EXCEPTION_ERROR(40401, "exception error"),
+
+    // fabric sdk
+    BLOCKCHAIN_INVOKE_TIMEOUT_ERROR(40801, "invoke timeout"),
+    BLOCKCHAIN_INVOKE_ERROR(40802, "invoke error"),
+    BLOCKCHAIN_INVOKE_SUCCESS(20801, "invoke success"),
+    BLOCKCHAIN_QUERY_TIMEOUT_ERROR(40803, "query timeout"),
+    BLOCKCHAIN_QUERY_ERROR(40804, "query error"),
+    BLOCKCHAIN_QUERY_SUCCESS(20802, "query success");
+
 
     private int code;
     private String msg;
