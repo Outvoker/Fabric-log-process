@@ -3,7 +3,7 @@ server:
 
 Spring:
   application:
-    name: logProducer
+    name: log-producer-service
 
 eureka:
   client:

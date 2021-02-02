@@ -3,7 +3,7 @@ server:
 
 Spring:
   application:
-    name: fabricService
+    name: fabric-sdk-service
 
 eureka:
   client:

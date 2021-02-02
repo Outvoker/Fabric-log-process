@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Xu Rui
  * @date 2021/1/27 16:05
  */
-@FeignClient(value = "LOGINDEXDATABASE")
+@FeignClient(value = "LOG-INDEX-DATABASE-SERVICE")
 public interface LogIndexDataBaseService {
 
     @GetMapping("/log/get")

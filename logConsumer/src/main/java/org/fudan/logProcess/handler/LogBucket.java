@@ -25,7 +25,7 @@ public class LogBucket {
     private LogConfig logConfig;    //policy
 
     private JSONObject jsonObject;
-    private ArrayList<ArrayList<String>> list;
+    private ArrayList<Map<String, String>> list;
     private int size;
     private int count;
     public final Object uploadLock = new Object();
@@ -149,15 +149,17 @@ public class LogBucket {
 
             messages.add(msg);
             //handle list
-            ArrayList<String> arr = new ArrayList<>();
-            for(int idx : this.logConfig.getHandler().getMergedItemIndex()) {
-                arr.add(logItem[idx]);
-            }
-            this.list.add(arr);
+            Map<String, String> map = new HashMap<>();
+            List<String> keys = this.logConfig.getHandler().getMergedDependence();
+            List<Integer> indexs = this.logConfig.getHandler().getMergedItemIndex();
+            for(int i = 0; i < indexs.size(); i++)
+                map.put(keys.get(i), logItem[indexs.get(i)]);
+            this.list.add(map);
+
             this.count++;
             if(this.list.size() >= this.logConfig.getSender().getNum() && this.list.size() != 0) {   //the number of list is met num in the policy
-                System.out.println("#################################################################");
-                System.out.printf("bucket is full: %d\n", this.list.size());
+//                System.out.println("#################################################################");
+//                System.out.printf("bucket is full: %d\n", this.list.size());
                 return true;
             }
             return false;
@@ -243,7 +245,7 @@ public class LogBucket {
     public Map<String, Object> getLogIndexDBParam(){
         MergedIndexItem item = new MergedIndexItem(this.keyName);
         for(int i = 0; i < list.size(); i++){
-            item.add(list.get(i).get(0), i);
+            item.add(list.get(i).get(this.logConfig.getHandler().getMergedDependence().get(0)), i);
         }
         return item.getDBMap();
     }

@@ -32,9 +32,6 @@ public class FabricSDKController {
     @Resource(description = "fabricService")
     FabricServiceInterface fabricServiceInterface;
 
-    @Resource
-    LogIndexDataBaseService logIndexDataBase;
-
     @PostMapping("/fabric/invoke")
     public DeferredResult<CommonResult<?>> invoke(@RequestParam("key") String key, @RequestParam("value") String value) {
         log.info("receive a request that invokes key = {}, value = {}", key, value);
@@ -69,15 +66,6 @@ public class FabricSDKController {
     public DeferredResult<CommonResult<?>> query(@RequestParam("key") String key) {
         log.info("receive a request that queries key = {}", key);
 
-        CommonResult<?> logIndexResult = logIndexDataBase.getLogByOriginalKey(key);
-        // TODO: if there is no related log in the db, return error
-        if(logIndexResult.getCode() == 400) return null;
-
-        log.info("*******************************************data from indexdb {}", logIndexResult.getData());
-        Map mergedLog = (Map)logIndexResult.getData();
-        log.info("*******************************************after merged id is {}", mergedLog.get("integratedKey"));
-        key = (String) mergedLog.get("integratedKey");
-
         // set the waiting period
         DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>( 10L);
         // get the information that queried from blockchain
@@ -86,7 +74,7 @@ public class FabricSDKController {
         // when timeout this callback method
         deferredResult.onTimeout(() -> {
             log.info(Thread.currentThread().getName() + "onTimeout");
-            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_TIMEOUT_ERROR, blockchainLog));
+            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_TIMEOUT_ERROR, blockchainLog));
         });
 
         // when callback method is completed, whether it is timeout or successful, it will enter this callback method

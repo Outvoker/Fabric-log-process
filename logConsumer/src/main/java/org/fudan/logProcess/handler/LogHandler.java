@@ -11,9 +11,11 @@ import org.fudan.logProcess.entity.CommonResult;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.jms.LogReplyProducer;
 import org.fudan.logProcess.logConfig.LogConfig;
+import org.fudan.logProcess.service.FabricSDKService;
 import org.fudan.logProcess.service.LogIndexDataBaseService;
 import org.fudan.logProcess.service.LogProcessService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
 import java.io.FileNotFoundException;
@@ -33,6 +35,9 @@ public class LogHandler implements LogProcessService{
 
     @Resource
     LogReplyProducer logReplyProducer;
+
+    @Resource
+    FabricSDKService fabricSDKService;
 
 //    private static SdkDemo s;
     private static int totalNum = 0;
@@ -55,9 +60,6 @@ public class LogHandler implements LogProcessService{
 
     private HashMap<HashSet<String>, LogBucket> map;
 
-//    public static SdkDemo getS() {
-//        return s;
-//    }
 
     public LogConfig getLogConfig() {
         return logConfig;
@@ -73,19 +75,37 @@ public class LogHandler implements LogProcessService{
             if(bucket.isUploaded) return;
             bucket.isUploaded = true;
 
+            CommonResult<?> fabricResult;
+            CommonResult<?> indexDBResult = null;
+
             //  write into blockchain
-            log.info("getBlockchainParams = {}", bucket.getBlockchainParams());
-            //  write into index DB
-            log.info("getLogIndexDBParam = {}", bucket.getLogIndexDBParam());
-            synchronized (times){
-                times += ((Map)bucket.getLogIndexDBParam().get("originalKeyIndex")).size();
-                log.info("upload times = {}", times);
+            List<String> params = bucket.getBlockchainParams();
+            log.info("getBlockchainParams = {}", params);
+            fabricResult = fabricSDKService.invoke(params.get(0), params.get(1));
+            log.info("invoke result = {}", fabricResult);
+            if(fabricResult== null || fabricResult.isError()) {
+                log.info("invoke into blockchain failed {}", fabricResult);
+            }else{
+                //  write into index DB
+                Map<String, Object> logIndexDBParam = bucket.getLogIndexDBParam();
+                log.info("getLogIndexDBParam = {}", logIndexDBParam);
+                synchronized (times){
+                    times += ((Map)logIndexDBParam.get("originalKeyIndex")).size();
+                    log.info("upload times = {}", times);
+                }
+                indexDBResult = logIndexDataBaseService.saveBatch(logIndexDBParam);
             }
-            CommonResult<?> result = logIndexDataBaseService.saveBatch(bucket.getLogIndexDBParam());
+
             //  reply the /log producer
-            log.info("getMessages = {}", bucket.getMessages());
+            log.info("reply all the messages in the bucket = {}", bucket.getMessages().size());
             try {
-                logReplyProducer.reply(bucket.getMessages(), new CommonResult<>(BaseError.CONSUME_SUCCESS, result).toString());
+                CommonResult<?> result;
+                if(fabricResult == null || fabricResult.isError())
+                    result = new CommonResult<>(BaseError.CONSUME_ERROR, fabricResult);
+                else if(indexDBResult == null || indexDBResult.isError())
+                    result = new CommonResult<>(BaseError.CONSUME_ERROR, indexDBResult);
+                else result = new CommonResult<>(BaseError.CONSUME_SUCCESS, new Object[]{fabricResult, indexDBResult});
+                logReplyProducer.reply(bucket.getMessages(), result.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -148,15 +168,6 @@ public class LogHandler implements LogProcessService{
         this.logReplyProducer = logReplyProducer;
 
         this.logConfig = new LogConfig(policyPath); //load policy
-
-//        s = new SdkDemo();  //new fabric java sdk demo
-//        try {
-//            s.checkConfig();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        s.setup();
-        System.out.println("Init sdkDemo success!");
 
         map = new HashMap<>();
     }

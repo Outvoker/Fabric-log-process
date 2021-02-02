@@ -3,7 +3,7 @@ server:
 
 Spring:
   application:
-    name: logIndexDataBase
+    name: log-index-database-service
   datasource:
     url: jdbc:mysql://10.177.73.196/log
     username: root

@@ -35,7 +35,7 @@ public class LogProducerController {
         log.info("Main thread " + Thread.currentThread().getName() + ": Enter pushLog Method");
 
         // timeout with 3 * 1000 ms
-        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(3*1000L);
+        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(30*1000L);
         //  Asynchronously call
         logSingleTaskService.request(deferredResult, aLog);
 
@@ -54,10 +54,10 @@ public class LogProducerController {
 
     @PostMapping("/log/pushBatch")
     public DeferredResult<CommonResult<?>> pushLogs(@RequestBody List<String> logs) {
-        log.info("Main thread " + Thread.currentThread().getName() + ": Enter pushLog Method");
+        log.info("Main thread " + Thread.currentThread().getName() + ": Enter pushLogs Method");
 
         //  timeout with 20 * 1000 ms
-        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(20*1000L);
+        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(30*1000L);
 
         //  Asynchronously call
         logMultiTaskService.request(deferredResult, logs);

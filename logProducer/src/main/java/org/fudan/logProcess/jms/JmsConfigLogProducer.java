@@ -25,6 +25,6 @@ public class JmsConfigLogProducer {
     /**
      * timeout (ms)
      */
-    public static long TIMEOUT = 5000L;
+    public static long TIMEOUT = 30 * 1000L;
 
 }

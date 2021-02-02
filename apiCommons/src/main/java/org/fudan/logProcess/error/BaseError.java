@@ -14,6 +14,7 @@ public enum BaseError {
 
     //  Read
     READ_SUCCESS(20100, "Query success"),
+    PULL_LOG_SUCCESS(20201, "Pull log success"),
     READ_ERROR(40100, "Query failed"),
 
     //  create
