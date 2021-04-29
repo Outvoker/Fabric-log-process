@@ -24,7 +24,7 @@ import java.util.*;
 
 @Service("logHandler")
 @Slf4j
-public class LogHandler implements LogProcessService{
+public class LogHandler implements LogProcessService {
 
     private static final String policyPath = "D:\\university\\blockchain\\logProcess\\logConsumer\\src\\main\\resources\\test.yml";
 
@@ -39,12 +39,12 @@ public class LogHandler implements LogProcessService{
     @Resource
     FabricSDKService fabricSDKService;
 
-//    private static SdkDemo s;
+    //    private static SdkDemo s;
     private static int totalNum = 0;
 
     private LogConfig logConfig;
 
-    private ThreadLocal<Integer> keyNum = new ThreadLocal(){
+    private ThreadLocal<Integer> keyNum = new ThreadLocal() {
         @Override
         protected Object initialValue() {
             return 999;
@@ -52,7 +52,7 @@ public class LogHandler implements LogProcessService{
     };  //a variable protected with lock
 
     public String getKeyNum() { //get the key number which is increasing order
-        this.keyNum.set(keyNum.get()+1);
+        this.keyNum.set(keyNum.get() + 1);
         return String.valueOf(keyNum.get());
     }
 
@@ -67,12 +67,13 @@ public class LogHandler implements LogProcessService{
 
     /**
      * upload the bucket that match condition to upload
-     * @param bucket    bucket
-     * @param set       set
+     *
+     * @param bucket bucket
+     * @param set    set
      */
-    public void upload(LogBucket bucket, HashSet<String> set){
+    public void upload(LogBucket bucket, HashSet<String> set) {
         synchronized (bucket.uploadLock) { //this lock avoids the situation that time is over and at the same time bucket is full
-            if(bucket.isUploaded) return;
+            if (bucket.isUploaded) return;
             bucket.isUploaded = true;
 
             CommonResult<?> fabricResult;
@@ -82,15 +83,16 @@ public class LogHandler implements LogProcessService{
             List<String> params = bucket.getBlockchainParams();
             log.info("getBlockchainParams = {}", params);
             fabricResult = fabricSDKService.invoke(params.get(0), params.get(1));
+//            fabricResult = new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS,"ok");
             log.info("invoke result = {}", fabricResult);
-            if(fabricResult== null || fabricResult.isError()) {
+            if (fabricResult == null || fabricResult.isError()) {
                 log.info("invoke into blockchain failed {}", fabricResult);
-            }else{
+            } else {
                 //  write into index DB
                 Map<String, Object> logIndexDBParam = bucket.getLogIndexDBParam();
                 log.info("getLogIndexDBParam = {}", logIndexDBParam);
-                synchronized (times){
-                    times += ((Map)logIndexDBParam.get("originalKeyIndex")).size();
+                synchronized (times) {
+                    times += ((Map) logIndexDBParam.get("originalKeyIndex")).size();
                     log.info("upload times = {}", times);
                 }
                 indexDBResult = logIndexDataBaseService.saveBatch(logIndexDBParam);
@@ -100,9 +102,9 @@ public class LogHandler implements LogProcessService{
             log.info("reply all the messages in the bucket = {}", bucket.getMessages().size());
             try {
                 CommonResult<?> result;
-                if(fabricResult == null || fabricResult.isError())
+                if (fabricResult == null || fabricResult.isError())
                     result = new CommonResult<>(BaseError.CONSUME_ERROR, fabricResult);
-                else if(indexDBResult == null || indexDBResult.isError())
+                else if (indexDBResult == null || indexDBResult.isError())
                     result = new CommonResult<>(BaseError.CONSUME_ERROR, indexDBResult);
                 else result = new CommonResult<>(BaseError.CONSUME_SUCCESS, new Object[]{fabricResult, indexDBResult});
                 logReplyProducer.reply(bucket.getMessages(), result.toString());
@@ -115,46 +117,49 @@ public class LogHandler implements LogProcessService{
     }
 
 
-    public void  logProcess(Message msg)  {   //process the log
+    public void logProcess(Message msg) {   //process the log
 
         String aLog = new String(msg.getBody(), StandardCharsets.UTF_8);
 
         String[] datas = aLog.split(this.logConfig.getInfo().getSeparator());
         HashSet<String> set = new HashSet<>();
-        for(int idx : this.logConfig.getHandler().getMergedDependenceIndex()){
+        for (int idx : this.logConfig.getHandler().getMergedDependenceIndex()) {
             set.add(datas[idx]);
         }
 
-        synchronized (createBucketLock){
-            if(!map.containsKey(set)){  //add a new merging item
-                log.info("create new bucket");
-                LogBucket bucket = new LogBucket(this.logConfig, Thread.currentThread().getName() + getKeyNum());
-                map.put(set, bucket);
 
-                //  set time to upload
-                if(logConfig.getSender().getTime() != 0 ){
-                    Timer uploadTimer = new Timer("timer" + set.toString());
-                    uploadTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            log.info("######### time is over!");
-                            upload(bucket, set);
-                        }
-                    }, logConfig.getSender().getTime());
+        if (!map.containsKey(set)) {  //add a new merging item
+            synchronized (createBucketLock) {
+                if(!map.containsKey(set)){
+                    log.info("create new bucket");
+                    LogBucket bucket = new LogBucket(this.logConfig, Thread.currentThread().getName() + getKeyNum());
+                    map.put(set, bucket);
+
+                    //  set time to upload
+                    if (logConfig.getSender().getTime() != 0) {
+                        Timer uploadTimer = new Timer("timer" + set.toString());
+                        uploadTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                log.info("######### time is over!");
+                                upload(bucket, set);
+                            }
+                        }, logConfig.getSender().getTime());
+                    }
                 }
             }
         }
 
         LogBucket bucket = map.get(set);
 
-        synchronized (bucket.uploadLock){
-            if(bucket.isUploaded) {
+        synchronized (bucket.uploadLock) {
+            if (bucket.isUploaded) {
                 logProcess(msg);
                 return;
             }
             log.info("write into bucket = {}", set);
             boolean flag = bucket.addMergedItem(msg, datas);    //  if bucket is full;
-            if(flag) {
+            if (flag) {
                 log.info("######### bucket is full!");
                 upload(bucket, set);
                 log.info("map size = {}", map.size());
@@ -177,7 +182,7 @@ public class LogHandler implements LogProcessService{
         System.out.println("receive data:" + messages.size());
         totalNum += messages.size();
 
-        for(Message msg : messages) {   //process the log in lines
+        for (Message msg : messages) {   //process the log in lines
             logProcess(msg);
         }
         System.out.println(Thread.currentThread().getName() + "totalNum is : " + totalNum);

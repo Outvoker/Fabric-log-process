@@ -28,7 +28,7 @@ public class LogBucket {
     private ArrayList<Map<String, String>> list;
     private int size;
     private int count;
-    public final Object uploadLock = new Object();
+    public final Object uploadLock;
     public boolean isUploaded = false;
     private String keyNum;
 
@@ -45,6 +45,8 @@ public class LogBucket {
 
 
     public LogBucket(LogConfig logConfig, String keyNum){
+
+        uploadLock = new Object();
 
         this.messages = new ArrayList<>();
 
@@ -91,7 +93,7 @@ public class LogBucket {
                         return Double.toString((Double.parseDouble(originalItem) * this.count + Double.parseDouble(item)) / (this.count + 1));
                     case "Float":
                         return Float.toString((Float.parseFloat(originalItem) * this.count + Float.parseFloat(item)) / (this.count + 1));
-                    case "Date":  //(d1-d2)*this.count/(++this.count)+d2 与 (originalItem*this.count+item)/(++this.count)一样
+                    case "Date":
                         long d1 = new SimpleDateFormat("yyyyMMdd").parse(originalItem).getTime();
                         long d2 = new SimpleDateFormat("yyyyMMdd").parse(item).getTime();
                         return new SimpleDateFormat("yyyyMMdd").format(new Date((d1 - d2) * this.count / (this.count + 1) + d2));

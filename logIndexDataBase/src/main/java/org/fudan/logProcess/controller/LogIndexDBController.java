@@ -24,6 +24,11 @@ public class LogIndexDBController {
     @Resource
     ILogService logService;
 
+    /**
+     * get the log from MySQL by key
+     * @param key   Key of the original tx
+     * @return      The result of the transaction index
+     */
     @GetMapping("/log/get")
     public CommonResult<?> getLogByOriginalKey(@RequestParam("key") String key){
         log.info("getLogByOriginalKey: key={}", key);
@@ -31,6 +36,13 @@ public class LogIndexDBController {
         return new CommonResult<>(BaseError.READ_SUCCESS, logService.getByOriginalKey(key));
     }
 
+    /**
+     * save the log into mySQL
+     * @param originalKey   Key of the original tx.
+     * @param integratedKey Key of the integrated tx.
+     * @param index         Index of the original tx in the integrated tx.
+     * @return              The result of the operation of inserting
+     */
     @PostMapping("/log/save")
     public CommonResult<?> saveLog(@RequestParam("originalKey") String originalKey,
                                    @RequestParam("integratedKey") String integratedKey,

@@ -53,8 +53,8 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
 
 
     // docker
-    private static final Path NETWORK_CONFIG_PATH = Paths.get("D:\\university\\blockchain\\logProcess\\fabricSDK\\src\\main\\resources\\connection.json");
-    private static final Path credentialPath = Paths.get("D:\\university\\blockchain\\logProcess\\fabricSDK\\src\\main\\resources\\crypto-config\\peerOrganizations\\org1.example.com\\users\\Admin@org1.example.com\\msp");
+    private static final Path NETWORK_CONFIG_PATH = Paths.get("D:\\university\\blockchain\\logProcess\\fabricSDK\\src\\main\\resources\\mychannel_connection_for_javasdk.yaml");
+    private static final Path credentialPath = Paths.get("D:\\university\\blockchain\\logProcess\\fabricSDK\\src\\main\\resources\\keyfiles\\peerOrganizations\\org1.example.com\\users\\Admin@org1.example.com\\msp");
 
     private X509Certificate certificate;
     private PrivateKey privateKey;
@@ -85,7 +85,7 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
 
             // load identities into wallet
             this.wallet = Wallets.newInMemoryWallet();
-            this.wallet.put("user", Identities.newX509Identity("Org1MSP", certificate, privateKey));
+            this.wallet.put("user", Identities.newX509Identity("org1-example-com", certificate, privateKey));
         } catch (Exception e) {
             log.info("reading certificate error");
             e.printStackTrace();
@@ -101,7 +101,7 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
             this.network = gateway.getNetwork("mychannel");
 
             this.channel = network.getChannel();
-            this.contract = network.getContract("mycc");
+            this.contract = network.getContract("test");
             this.peerSet = channel.getPeers();
         } catch (Exception e) {
             log.info("connect error");
@@ -132,13 +132,11 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
 
     /**
      * according to original_key to search mergedLog in the blockchain
-     * @param deferred
      * @param key the original key
      * @return the merged log in the blockchain
      */
-    @Async
     @Override
-    public BlockchainLog query(DeferredResult<CommonResult<?>> deferred, String key) {
+    public BlockchainLog query(String key) {
 
         //try {
         //    //Thread.sleep(6 * 1000L);
@@ -148,15 +146,15 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
         //}
 
 
-        // TODO: 处理一下查询index db 失败的情况
+        // TODO: Deal with the failure of index DB query
         Log logIndex = queryFromIndexDB(key);
         if(logIndex == null) return null; // query from index db is error
 
-        // TODO: 根据从处理一下从区块链中查询出来的结果
+        // TODO: According to the query results from the blockchain
         String mergeLogString = queryFromBlockchain(logIndex.getIntegratedKey());
         Map<String, Object> mergedLogMap = JSONObject.parseObject(mergeLogString);
 
-        // TODO: 对合并后的日志进行分解，拿到最初的日志
+        // TODO: Decompose the merged log to get the original log
         mergedLogMap.remove("count");
         JSONArray mergedItems = (JSONArray) mergedLogMap.get("list");
         //log.info("list class = {}", mergedLogMap.get("list").getClass());
@@ -167,39 +165,35 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
         mergedLogMap.remove("list");
 
 
-        // TODO: 这里怎么不初始化，利用Spring的机制
+        // TODO: Why don't we initialize here and use spring's mechanism
         BlockchainLog queryResult = new BlockchainLog();
         queryResult.setKey(logIndex.getIntegratedKey());
         try {
             queryResult.setValue(JSON.toJSONString(mergedLogMap));
             log.info("************************The key of {} is: {}", queryResult.getKey(), queryResult.getValue());
-            deferred.setResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_SUCCESS, queryResult));
         } catch (Exception e) {
             log.info("************************queryByPeer Error");
-            deferred.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_ERROR, queryResult));
             e.printStackTrace();
         }
         return queryResult;
     }
 
-    @Async
     @Override
-    public Boolean invoke(DeferredResult<CommonResult<?>> deferred, BlockchainLog blockchainLog) {
+    public Boolean invoke(BlockchainLog blockchainLog) {
 
         try {
-            // TODO: 修改相应的智能合约
+            // TODO: Modify the corresponding smart contract
             Transaction transaction = contract.createTransaction("putData");
             transaction.setEndorsingPeers(channel.getPeers());
             transaction.submit(blockchainLog.getKey(), blockchainLog.getValue());
 
             log.info("invoke in blockchain");
-            deferred.setResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS, blockchainLog));
         } catch (Exception e) {
             log.info("Invoke Error");
-            deferred.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_ERROR, blockchainLog));
             e.printStackTrace();
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
     }
+
 }

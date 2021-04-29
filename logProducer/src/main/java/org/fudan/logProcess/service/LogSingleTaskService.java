@@ -26,31 +26,27 @@ public class LogSingleTaskService {
 
     /**
      * Asynchronously call request method to produce message to MQ, and wait for the result of consuming.
-     * @param deferred  DeferredResult
      * @param tag       tag
      * @param msg       message
      */
-    @Async
-    public void request(DeferredResult<CommonResult<?>> deferred, String tag, String msg){
+    public CommonResult<?> request(String tag, String msg){
         log.info(Thread.currentThread().getName() + "enter taskService.request");
         try {
             CommonResult<?> result =  logProducer.request(tag, msg);
             log.info(Thread.currentThread().getName() + "request success: {}", result);
-            deferred.setResult(result);
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
-            deferred.setResult(new CommonResult<>(BaseError.PRODUCE_ERROR));
+            return new CommonResult<>(BaseError.PRODUCE_ERROR);
         }
     }
 
     /**
-     * Same to {@link #request(DeferredResult, String, String)} with no tag.
-     * @param deferred  DeferredResult
+     * Same to {@link #request(String, String)} with no tag.
      * @param msg       message
      */
-    @Async
-    public void request(DeferredResult<CommonResult<?>> deferred, String msg){
-        this.request(deferred, "", msg);
+    public CommonResult<?> request(String msg){
+        return this.request("", msg);
     }
 
 

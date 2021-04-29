@@ -5,9 +5,9 @@ Spring:
   application:
     name: log-index-database-service
   datasource:
-    url: jdbc:mysql://10.177.73.196/log
+    url: jdbc:mysql://10.176.25.51/log
     username: root
-    password:
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 eureka:

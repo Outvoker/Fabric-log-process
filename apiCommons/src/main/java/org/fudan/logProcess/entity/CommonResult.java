@@ -7,7 +7,7 @@ import org.fudan.logProcess.error.BaseError;
 /**
  * @author Xu Rui
  * @date 2021/1/16 15:43
- * 通用返回类型
+ * 通Common return type
  */
 @Data
 @AllArgsConstructor
@@ -20,25 +20,25 @@ public class CommonResult<T> {
     private T       data;
 
     /**
-     * 无数据构造器
-     * @param error 错误类型
+     * data constructors
+     * @param error error type
      */
     public CommonResult(BaseError error){
         this(error.isError() ? -1 : 1, error.getCode(), error.getMsg(), error, null);
     }
 
     /**
-     * 有数据构造器
-     * @param error 错误类型
-     * @param data  数据
+     * data constructors
+     * @param error error type
+     * @param data  data
      */
     public CommonResult(BaseError error, T data){
         this(error.isError() ? -1 : 1, error.getCode(), error.getMsg(), error, data);
     }
 
     /**
-     * 设置错误
-     * @param error 错误类型
+     * Setting error
+     * @param error error type
      */
     public void setError(BaseError error){
         this.error = error;
@@ -48,9 +48,9 @@ public class CommonResult<T> {
     }
 
     /**
-     * 设置错误和数据
-     * @param error 错误类型
-     * @param data  数据
+     * Setup errors and data
+     * @param error errors
+     * @param data  data
      */
     public void set(BaseError error, T data){
         setError(error);
@@ -58,9 +58,9 @@ public class CommonResult<T> {
     }
 
     /**
-     * 追加错误信息
-     * @param msg   添加的信息
-     * @return      返回通用结果
+     * Appending error information
+     * @param msg   error message
+     * @return      CommonResult<T>
      */
     public CommonResult<T> addMsg(String msg){
         this.error.setMsg(this.error.getMsg() + " " + msg);
@@ -68,15 +68,15 @@ public class CommonResult<T> {
     }
 
     /**
-     * 返回是否失败
-     * @return  true为失败，false为成功
+     * Return whether to fail or not
+     * @return  true is fail，false is success
      */
     public boolean isError(){
         return error.isError();
     }
 
     /**
-     * String 转换为 CommonResult
+     * String transfer to CommonResult
      * @param str   str
      * @return      CommonResult
      */
@@ -85,7 +85,7 @@ public class CommonResult<T> {
     }
 
     /**
-     * 转换为String
+     * transfer to String
      * @return  String
      */
     @Override

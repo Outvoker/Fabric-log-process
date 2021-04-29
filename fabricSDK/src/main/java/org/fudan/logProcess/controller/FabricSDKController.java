@@ -33,61 +33,36 @@ public class FabricSDKController {
     FabricServiceInterface fabricServiceInterface;
 
     @PostMapping("/fabric/invoke")
-    public DeferredResult<CommonResult<?>> invoke(@RequestParam("key") String key, @RequestParam("value") String value) {
+    public CommonResult<?> invoke(@RequestParam("key") String key, @RequestParam("value") String value) {
         log.info("receive a request that invokes key = {}, value = {}", key, value);
         // get the information that will be saved into blockchain
         BlockchainLog blockchainLog = new BlockchainLog(key, value);
 
-        // set the waiting period
-        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>(10 * 1000L);
         // Asynchronously call fabric to invoke
-        Boolean flag = fabricServiceInterface.invoke(deferredResult, blockchainLog);
+        Boolean flag = fabricServiceInterface.invoke(blockchainLog);
 
-        // when timeout this callback method
-        deferredResult.onTimeout(() -> {
-            log.info(Thread.currentThread().getName() + "onTimeout");
-            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_TIMEOUT_ERROR, blockchainLog));
-        });
 
         // when callback method is completed, whether it is timeout or successful, it will enter this callback method
-        deferredResult.onCompletion(() -> {
-            log.info(Thread.currentThread().getName() + " onCompletion");
-            // Asynchronously save into blockchain
-            if(flag) {
-                deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS, blockchainLog));
-            } else {
-                deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_ERROR, blockchainLog));
-            }
-        });
-        return deferredResult;
+        if(flag) {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS, blockchainLog);
+        } else {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_ERROR, blockchainLog);
+        }
     }
 
     @GetMapping("/fabric/query")
-    public DeferredResult<CommonResult<?>> query(@RequestParam("key") String key) {
+    public CommonResult<?> query(@RequestParam("key") String key) {
         log.info("receive a request that queries key = {}", key);
 
-        // set the waiting period
-        DeferredResult<CommonResult<?>> deferredResult = new DeferredResult<>( 10L);
         // get the information that queried from blockchain
-        BlockchainLog blockchainLog = fabricServiceInterface.query(deferredResult, key);
+        BlockchainLog blockchainLog = fabricServiceInterface.query(key);
 
-        // when timeout this callback method
-        deferredResult.onTimeout(() -> {
-            log.info(Thread.currentThread().getName() + "onTimeout");
-            deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_TIMEOUT_ERROR, blockchainLog));
-        });
 
-        // when callback method is completed, whether it is timeout or successful, it will enter this callback method
-        deferredResult.onCompletion(() -> {
-            log.info(Thread.currentThread().getName() + " onCompletion");
-            // check if queried successfully
-            if (blockchainLog != null) {
-                deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_SUCCESS, blockchainLog));
-            } else {
-                deferredResult.setErrorResult(new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_ERROR));
-            }
-        });
+        if (blockchainLog != null) {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_SUCCESS, blockchainLog);
+        } else {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_ERROR);
+        }
 
-        return deferredResult;
     }
 }

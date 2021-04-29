@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @RestController
 @Slf4j
@@ -19,9 +23,15 @@ public class WebServiceController {
     @Resource
     private FabricSDKService fabricSDKService;
 
-    @PostMapping("/log/push")
+    @PostMapping(value = "/log/push")
     public CommonResult<?> pushLog(@RequestBody String aLog){
+        try {
+            aLog = URLDecoder.decode(aLog, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         log.info("pushLog: {}", aLog);
+
         return new CommonResult<>(BaseError.PUSH_LOG_SUCCESS,logProducerFeignService.pushLog(aLog));
     }
 

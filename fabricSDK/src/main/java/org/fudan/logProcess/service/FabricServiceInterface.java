@@ -14,6 +14,6 @@ import org.springframework.web.context.request.async.DeferredResult;
  * @Create: 2021-01-29 15:09
  **/
 public interface FabricServiceInterface {
-    Boolean invoke(DeferredResult<CommonResult<?>> deferred, BlockchainLog blockchainLog);
-    BlockchainLog query(DeferredResult<CommonResult<?>> deferred, String key);
+    Boolean invoke(BlockchainLog blockchainLog);
+    BlockchainLog query(String key);
 }

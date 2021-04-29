@@ -39,7 +39,6 @@ public class TestRecord {
     }
 
     public void showResult () {
-//        System.out.println("开始时间：" + new DateTime(this.startDate).toString("yyyy-MM-dd HH:mm:ss.SSS") + " 批大小：" + size + "\t耗时：" + (end - start) + "ms");
         System.out.println(new DateTime(this.startDate).toString("HH:mm:ss.SSS"));
     }
 

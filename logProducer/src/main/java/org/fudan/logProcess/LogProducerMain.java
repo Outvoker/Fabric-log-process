@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @author Xu Rui
  */
 @SpringBootApplication
-@EnableAsync
 @EnableEurekaClient
 public class LogProducerMain {
     public static void main(String[] args) {

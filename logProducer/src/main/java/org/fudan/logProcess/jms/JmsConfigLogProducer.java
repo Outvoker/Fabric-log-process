@@ -10,7 +10,7 @@ public class JmsConfigLogProducer {
     /**
      * Name Server addr, if it is a cluster deployment, use semicolons to separate it
      */
-    public static final String NAME_SERVER = "10.177.73.196:9876";
+    public static final String NAME_SERVER = "10.176.25.51:9876";
 
     /**
      * topic name
