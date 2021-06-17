@@ -50,7 +50,9 @@ public class LogSingleTaskService {
     }
 
 
-
+    public CommonResult<?> send(String msg){
+        return logProducer.send(msg);
+    }
 
 
 }

@@ -33,4 +33,15 @@ public class LogProducerController {
         return logSingleTaskService.request(aLog);
     }
 
+    /**
+     * Push one log.
+     * @param aLog  log
+     * @return      CommonResult
+     */
+    @PostMapping("/log/pushAsync")
+    public CommonResult<?> pushLogAsync(@RequestBody String aLog) {
+        log.info("Main thread " + Thread.currentThread().getName() + ": Enter pushLogAsync Method :{}", aLog);
+        return logSingleTaskService.send(aLog);
+    }
+
 }

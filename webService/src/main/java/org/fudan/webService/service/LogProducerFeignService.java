@@ -15,4 +15,8 @@ public interface LogProducerFeignService {
 
     @PostMapping("/log/push")
     CommonResult<?> pushLog(@RequestBody String aLog);
+
+    @PostMapping("/log/pushAsync")
+    CommonResult<?> pushLogAsync(@RequestBody String aLog);
+
 }

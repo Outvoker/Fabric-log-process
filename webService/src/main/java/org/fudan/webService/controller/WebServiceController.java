@@ -35,6 +35,18 @@ public class WebServiceController {
         return new CommonResult<>(BaseError.PUSH_LOG_SUCCESS,logProducerFeignService.pushLog(aLog));
     }
 
+    @PostMapping(value = "/log/pushAsync")
+    public CommonResult<?> pushLogAsync(@RequestBody String aLog){
+        try {
+            aLog = URLDecoder.decode(aLog, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        log.info("pushLog: {}", aLog);
+
+        return new CommonResult<>(BaseError.PUSH_LOG_SUCCESS,logProducerFeignService.pushLogAsync(aLog));
+    }
+
     @GetMapping("/log/pull")
     CommonResult<?> pullLog(@RequestParam("key") String key){
         log.info("pullLog: {}", key);

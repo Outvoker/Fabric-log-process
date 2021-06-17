@@ -16,4 +16,5 @@ import org.springframework.web.context.request.async.DeferredResult;
 public interface FabricServiceInterface {
     Boolean invoke(BlockchainLog blockchainLog);
     BlockchainLog query(String key);
+    String queryOne(String key);
 }

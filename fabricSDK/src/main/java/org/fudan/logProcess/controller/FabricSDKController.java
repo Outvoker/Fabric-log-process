@@ -8,10 +8,7 @@ import org.fudan.logProcess.entity.Log;
 import org.fudan.logProcess.error.BaseError;
 import org.fudan.logProcess.service.FabricServiceInterface;
 import org.fudan.logProcess.service.LogIndexDataBaseService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
@@ -50,6 +47,25 @@ public class FabricSDKController {
         }
     }
 
+    @PostMapping("/fabric/pushLog")
+    public CommonResult<?> pushLog(@RequestBody String aLog) {
+        log.info("receive a request that pushLog log = {}", aLog);
+        // get the information that will be saved into blockchain
+        String[] split = aLog.split("\\|@\\|");
+        BlockchainLog blockchainLog = new BlockchainLog(split[0], aLog);
+
+        // Asynchronously call fabric to invoke
+        Boolean flag = fabricServiceInterface.invoke(blockchainLog);
+
+
+        // when callback method is completed, whether it is timeout or successful, it will enter this callback method
+        if(flag) {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_SUCCESS, blockchainLog);
+        } else {
+            return new CommonResult<>(BaseError.BLOCKCHAIN_INVOKE_ERROR, blockchainLog);
+        }
+    }
+
     @GetMapping("/fabric/query")
     public CommonResult<?> query(@RequestParam("key") String key) {
         log.info("receive a request that queries key = {}", key);
@@ -64,5 +80,12 @@ public class FabricSDKController {
             return new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_ERROR);
         }
 
+    }
+
+    @GetMapping("/fabric/queryOne")
+    public CommonResult<?> queryOne(@RequestParam("key") String key){
+        log.info("query one without parsing, key = {}", key);
+        String result = fabricServiceInterface.queryOne(key);
+        return new CommonResult<>(BaseError.BLOCKCHAIN_QUERY_SUCCESS, result);
     }
 }

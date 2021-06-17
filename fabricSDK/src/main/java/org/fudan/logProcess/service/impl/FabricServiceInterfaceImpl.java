@@ -27,10 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Program: Fabric-log-process
@@ -179,13 +176,21 @@ public class FabricServiceInterfaceImpl implements FabricServiceInterface {
     }
 
     @Override
+    public String queryOne(String key){
+        String result = queryFromBlockchain(key);
+        return result;
+    }
+
+    @Override
     public Boolean invoke(BlockchainLog blockchainLog) {
 
         try {
             // TODO: Modify the corresponding smart contract
             Transaction transaction = contract.createTransaction("putData");
-            transaction.setEndorsingPeers(channel.getPeers());
+//            transaction.setEndorsingPeers(channel.getPeers());
+            transaction.setEndorsingPeers(channel.getPeers(EnumSet.of(Peer.PeerRole.ENDORSING_PEER)));
             transaction.submit(blockchainLog.getKey(), blockchainLog.getValue());
+
 
             log.info("invoke in blockchain");
         } catch (Exception e) {

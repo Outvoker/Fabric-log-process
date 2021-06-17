@@ -10,6 +10,8 @@
     <modules>
         <module>logProducer</module>
         <module>logConsumer</module>
+        <module>logConsumer2</module>
+        <module>logConsumer3</module>
         <module>apiCommons</module>
         <module>logIndexDataBase</module>
         <module>eurekaServer</module>
